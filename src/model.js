@@ -12,8 +12,10 @@
 /** Schema limits shared by the model, the validator and the editor form (maxlength). */
 export const LIMITS = Object.freeze({ title: 200, subtitle: 500, text: 5000, eras: 200, events: 500 });
 
-/** Selectable themes. The first entry is the fallback for unknown values. */
-export const THEMES = Object.freeze(['classic', 'dark', 'minimal']);
+/** Selectable themes (UI order). The first entry is the fallback for unknown values. */
+export const THEMES = Object.freeze([
+  'classic', 'dark', 'minimal', 'block', 'diamond', 'zigzag', 'metro', 'notebook', 'cards', 'newspaper', 'terminal',
+]);
 
 /** Allowed id format: 1-64 letters, digits, underscore or hyphen. */
 export const ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;

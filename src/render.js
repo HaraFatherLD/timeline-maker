@@ -3,18 +3,18 @@
 // TIMELINE_CSS is shared by the live preview and the exported document, so both look the same.
 // The CSS must stay self-contained: no url(), no @import, system font stacks only, and no colour literals.
 // Every colour is one of the twelve palette variables set on the root (and, per era, on its <li>).
+// The base rules below are the classic look (plus dark and minimal); the eight structural themes live in
+// theme-css.js and only add `.theme-<id>` rules, so the markup is identical for all eleven themes.
 import { escapeHtml } from './escape.js';
 import { THEMES } from './schema.js';
 import { PALETTE_TOKENS, cssVar, isHex, paletteOf } from './palette.js';
-
-const SERIF = 'Georgia,"Times New Roman","Noto Serif KR","Noto Serif CJK KR","Nanum Myeongjo",Batang,serif';
-const SANS = 'system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif';
+import { SERIF, SANS, THEME_CSS, THEME_MEDIA_CSS } from './theme-css.js';
 
 // An era colour overrides these tokens on its own <li>: era dot, card edge and period, event dots, event dates.
 const ERA_COLOR_TOKENS = ['accent', 'dot', 'date'];
 
-/** CSS for the `.tl` root and its three themes. Themes keep only non-colour rules (fonts, minimal layout). */
-export const TIMELINE_CSS = `
+// Base rules: the `.tl` root and the classic look; dark and minimal only change fonts and the minimal layout.
+const BASE_CSS = `
 .tl{box-sizing:border-box;padding:36px 20px 56px;background:var(--bg);color:var(--fg);
 font:16px/1.7 ${SERIF};overflow-wrap:anywhere}
 .theme-dark{font-family:${SANS}}
@@ -48,6 +48,13 @@ background:var(--bg);border:3px solid var(--dot)}
 @media (max-width:520px){.tl{padding:24px 14px 40px}.tl-title{font-size:1.6rem}.tl-era-head{padding:12px 14px}}
 @media print{.tl{background:none}.tl-era-head,.tl-event{break-inside:avoid}}
 `;
+
+/**
+ * CSS for the `.tl` root and all eleven themes: the base rules, then each structural theme, then the
+ * narrow-screen and print rules of those themes. Colours are only the twelve palette variables.
+ * @type {string}
+ */
+export const TIMELINE_CSS = BASE_CSS + Object.values(THEME_CSS).join('') + THEME_MEDIA_CSS;
 
 const list = (value) => (Array.isArray(value) ? value : []);
 

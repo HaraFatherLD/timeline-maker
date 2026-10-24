@@ -9,8 +9,30 @@ export const PALETTE_TOKENS = Object.freeze([
   'bg', 'title', 'subtitle', 'fg', 'muted', 'line', 'accent', 'dot', 'card', 'edge', 'eraName', 'date',
 ]);
 
-/** Tokens the minimal theme never draws (era card background and border); the colour panel hides them. */
-export const MINIMAL_HIDDEN_TOKENS = Object.freeze(['card', 'edge']);
+const unused = (...tokens) => Object.freeze(tokens);
+
+/**
+ * Per theme, the tokens its CSS never draws (see theme-css.js); the colour panel hides those rows.
+ * Hidden rows are not removed, so a stored value survives a theme switch. Key order follows THEMES.
+ * @type {Readonly<Record<string, ReadonlyArray<string>>>}
+ */
+export const THEME_UNUSED_TOKENS = Object.freeze({
+  classic: unused(), dark: unused(), minimal: unused('card', 'edge'), block: unused(), diamond: unused(),
+  zigzag: unused(), metro: unused('card', 'edge'), notebook: unused('card'), cards: unused('line'),
+  newspaper: unused(), terminal: unused(),
+});
+
+/** Tokens the minimal theme never draws (era card background and border); same value as THEME_UNUSED_TOKENS.minimal. */
+export const MINIMAL_HIDDEN_TOKENS = THEME_UNUSED_TOKENS.minimal;
+
+/**
+ * Tokens the given theme never draws. Unknown themes (including names such as "constructor") have none.
+ * @param {unknown} theme
+ * @returns {ReadonlyArray<string>}
+ */
+export function unusedTokens(theme) {
+  return THEMES.includes(theme) ? THEME_UNUSED_TOKENS[theme] : [];
+}
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
@@ -37,8 +59,10 @@ const freezeValues = (map) => Object.freeze(Object.fromEntries(
   Object.entries(map).map(([key, value]) => [key, Object.freeze(value)])));
 
 /**
- * Default colours of each theme: the v2 look. Title and era name default to the body colour, the subtitle
- * to the muted colour, the event dot and date to the accent. Minimal never draws card/edge (see render.js).
+ * Default colours of each theme. Classic, dark and minimal keep the v2 look: title and era name default to the
+ * body colour, the subtitle to the muted colour, the event dot and date to the accent (minimal never draws
+ * card/edge). The eight v4 themes have their own original palettes, tuned to their structure (theme-css.js);
+ * every pair of text colour and the page or card behind it stays above a 4.5:1 contrast ratio.
  * @type {Readonly<Record<string, Readonly<Palette>>>}
  */
 export const THEME_PALETTES = freezeValues({
@@ -53,6 +77,38 @@ export const THEME_PALETTES = freezeValues({
   minimal: {
     bg: '#ffffff', title: '#1c1c1e', subtitle: '#6a6e75', fg: '#1c1c1e', muted: '#6a6e75', line: '#d6d8dd',
     accent: '#1c1c1e', dot: '#1c1c1e', card: '#ffffff', edge: '#ffffff', eraName: '#1c1c1e', date: '#1c1c1e',
+  },
+  block: {
+    bg: '#fbf1cf', title: '#111111', subtitle: '#4a4535', fg: '#161616', muted: '#4d4a3d', line: '#161616',
+    accent: '#cc211a', dot: '#1f3fbf', card: '#ffffff', edge: '#161616', eraName: '#111111', date: '#b3140d',
+  },
+  diamond: {
+    bg: '#eef2fb', title: '#14213d', subtitle: '#4a5878', fg: '#1b2744', muted: '#4d5a78', line: '#8ea3d6',
+    accent: '#2a4fa8', dot: '#b07d12', card: '#ffffff', edge: '#b9c6e6', eraName: '#14213d', date: '#8a5f00',
+  },
+  zigzag: {
+    bg: '#f0faf7', title: '#10312b', subtitle: '#3f6b62', fg: '#17332d', muted: '#4a6a63', line: '#7fd1c3',
+    accent: '#c8431c', dot: '#0f8f7d', card: '#ffffff', edge: '#bfe6dd', eraName: '#10312b', date: '#0b6e60',
+  },
+  metro: {
+    bg: '#f1f5f9', title: '#0f2740', subtitle: '#4a617a', fg: '#16283a', muted: '#4b5f73', line: '#1971c2',
+    accent: '#1971c2', dot: '#1971c2', card: '#ffffff', edge: '#cbd5e1', eraName: '#0f2740', date: '#1864ab',
+  },
+  notebook: {
+    bg: '#fbf8ef', title: '#1f2d57', subtitle: '#55627f', fg: '#243046', muted: '#56627a', line: '#b8d0e8',
+    accent: '#2b4c9b', dot: '#2b4c9b', card: '#fbf8ef', edge: '#e07a7a', eraName: '#1f2d57', date: '#2b4c9b',
+  },
+  cards: {
+    bg: '#e8ecf6', title: '#1d2140', subtitle: '#505a80', fg: '#232846', muted: '#575f82', line: '#c5cde3',
+    accent: '#5240d6', dot: '#5240d6', card: '#ffffff', edge: '#c3cbe3', eraName: '#1d2140', date: '#4331b8',
+  },
+  newspaper: {
+    bg: '#e9e2cf', title: '#141414', subtitle: '#4a463c', fg: '#1c1b18', muted: '#4d493f', line: '#2b2a26',
+    accent: '#a4161a', dot: '#a4161a', card: '#f3eddc', edge: '#8f8a7a', eraName: '#141414', date: '#8c1216',
+  },
+  terminal: {
+    bg: '#0b100c', title: '#d8ffe2', subtitle: '#86bf94', fg: '#bdf5c9', muted: '#86bf94', line: '#2f6b3f',
+    accent: '#3dff86', dot: '#3dd68c', card: '#111a13', edge: '#2f6b3f', eraName: '#e6ffec', date: '#7be495',
   },
 });
 

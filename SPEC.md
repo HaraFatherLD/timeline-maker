@@ -167,3 +167,43 @@ Theme    = 'classic' | 'dark' | 'minimal'
 - (rev.3) `isHex`는 `typeof v === 'string'` 검사 후 정규식 적용(배열 등 비문자열 거부). 저장·출력 hex는 항상 소문자 `#rrggbb`.
 - (rev.3) `applyPreset`·`resetPalette`·`resetPaletteColor`도 theme∈THEMES(배열 includes)가 아니면 무변화. `resolvePalette`의 테마 판정도 `THEMES.includes`.
 - (rev.3) `serializeTimeline`은 정규화하지 않고 입력을 그대로 JSON화한다. AP-023의 hex 금지 검사는 `TIMELINE_CSS` 전체가 대상.
+
+---
+
+# v4 — 구조가 다른 테마 8종 추가 (2026-10-25, 사용자 승인: 목록대로, 완료 후 배포)
+
+## 테마 목록
+`THEMES` (순서 고정, 첫 값이 폴백):
+`classic, dark, minimal, block, diamond, zigzag, metro, notebook, cards, newspaper, terminal`
+
+`THEME_LABELS`(UI 표시): 클래식, 다크, 미니멀, 블록, 다이아, 지그재그, 노선도, 노트, 카드 배지, 신문, 터미널
+
+| id | 시대 표시 (`.tl-era::before`) | 사건 표시 (`.tl-event::before`) | 선·배치 | 글꼴·카드 |
+|---|---|---|---|---|
+| block | 채운 정사각형 | 작은 채운 정사각형 | 굵은 실선(8px 내외) | 각진 카드(radius 0), 굵은 산세리프 |
+| diamond | 45° 회전 정사각형(마름모) | 빈 마름모 | 점선(`repeating-linear-gradient`) | 세리프, 얇은 테두리 카드 |
+| zigzag | 큰 원 | 작은 원 | **가운데 세로선**, 시대가 좌우 번갈아 배치(`nth-child`) — 타임라인 영역 폭 ≤ 600px이면 왼쪽 선 한 줄 배치로 전환(컨테이너 쿼리), 미지원 브라우저는 뷰포트 ≤ 640px 폴백 | 둥근 카드 |
+| metro | 이중 원(두꺼운 테두리 + 안쪽 원, 정류장) | 작은 흰 원 정류장 | 매우 굵은 노선(10px 이상), 둥근 끝 | 산세리프, 카드 없이 이름 강조 (특정 회사 디자인 아님) |
+| notebook | 체크박스(빈 정사각형 테두리) | 짧은 가로 대시 | 줄 노트 배경(`repeating-linear-gradient` 가로줄) + 왼쪽 여백선 | 손글씨 느낌 시스템 글꼴 스택(없으면 일반 글꼴), 카드 배경 투명 |
+| cards | CSS counter 번호 배지(①처럼 원 안 숫자) | 작은 점 글머리 | **세로선 없음**, 그림자 카드 묶음 | 산세리프 |
+| newspaper | 날짜 도장 박스(테두리 사각 + 기간 강조) | `▸` 글머리 | 이중 괘선(상하 border double) | 세리프, 칼럼 느낌 |
+| terminal | `>` 프롬프트 문자 | `-` 문자 | ASCII 선 느낌(점선/`│` 문자) | 고정폭 글꼴, 카드 테두리 점선 |
+
+- 모든 모양은 CSS만으로(`clip-path`, `border`, `transform`, `::before`/`::after`, `content`, `counter`). **마크업(renderTimeline)은 변경하지 않는다** — 테마는 루트 클래스 `theme-<id>`로만 달라진다.
+- 모든 색은 기존 12 토큰 변수 사용(hex 리터럴 금지 유지). 각 테마는 `THEME_PALETTES`에 고유 기본 12색을 가진다(원작 색 조합).
+- `THEME_UNUSED_TOKENS`(palette.js): 테마별로 화면에 쓰이지 않는 토큰 목록 — `minimal: ['card','edge']`, `cards: ['line']`, 그 외 `[]`. 색상 패널은 현재 테마의 미사용 토큰 행을 숨긴다. `MINIMAL_HIDDEN_TOKENS`는 `THEME_UNUSED_TOKENS.minimal`과 같은 값으로 유지(하위 호환).
+- 빠른 색 조합·시대별 색·테마별 팔레트 저장은 11종 모두에서 동작.
+- 반응형: 모든 테마가 폭 360px에서 가로 스크롤 없음. zigzag는 타임라인 영역 폭이 ≤600px일 때 한 줄 배치(컨테이너 쿼리 `@container`, 편집기 2단 레이아웃의 좁은 미리보기 칸에서도 전환), 컨테이너 쿼리 미지원 브라우저는 `@supports not` 안의 뷰포트 ≤640px `@media`로 폴백.
+- 인쇄(`@media print`)에서 모든 테마 내용이 잘리지 않음.
+
+## v4 수용 기준
+- AC-26 테마 11종 등록·라벨·폴백
+- AC-27 11종 × 12토큰 기본 색 완전·유효, 미사용 토큰 목록
+- AC-28 테마별 구조 CSS 존재(시대/사건 표시 규칙), CSS hex 금지 유지
+- AC-29 브라우저: 11종 스크린샷이 서로 구조적으로 구분, 색 변경 반영, 390px·zigzag 한 줄 전환, 내보낸 HTML 동일
+- AC-30 배포 URL 반영
+- (v4 rev.2) `THEME_UNUSED_TOKENS`: `minimal: ['card','edge']`, `metro: ['card','edge']`(카드 없음), `notebook: ['card']`(카드 투명, 테두리는 여백선으로 사용), `cards: ['line']`, 나머지 `[]`.
+- (v4 rev.2) 테마 CSS는 `src/theme-css.js`(테마별 문자열을 모아 export)로 분리하고 `render.js`가 조합해 `TIMELINE_CSS`로 재export. 파일당 300줄 이하. CSS 이스케이프(`\2460` 등) 대신 글리프를 직접 쓴다(JS 템플릿 리터럴 SyntaxError 방지). zigzag의 한 줄 전환 규칙(`@container` 및 폴백 `@media`)은 해당 테마 기본 규칙보다 뒤에 둔다. newspaper 도장은 `.tl-era-period` 테두리로 구현.
+- (v4 rev.3, code-review 반영) **zigzag 한 줄 전환 기준**: zigzag 루트에만 `.theme-zigzag{container-type:inline-size}`를 두고(다른 테마 CSS는 불변), 한 줄 배치 규칙을 `@container (max-width:600px){…}`에 둔다 — 타임라인 영역 폭이 ≤600px이면 전환(내보낸 페이지에서 600px는 뷰포트 640px − 좌우 패딩 40px과 같음). 컨테이너 쿼리 미지원 브라우저용으로 같은 규칙 본문을 `@supports not (container-type:inline-size){@media (max-width:640px){…}}`에도 둔다(폴백 필수). 뷰포트 기준 단독 `@media`는 편집기 2단 레이아웃의 좁은 미리보기 칸(약 420~640px)에서 전환되지 않아 쓰지 않는다.
+- (v4 rev.3) **글꼴 스택**: 모든 글꼴 스택은 마지막 일반 글꼴(`serif`/`sans-serif`/`monospace`) 앞에 한글 글꼴(`Malgun Gothic`, `Apple SD Gothic Neo`, `Noto Sans KR` 등)을 둔다. terminal은 `… "Courier New","Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",monospace`.
+- (v4 rev.3) zigzag 카드(`.tl-era-head`)는 padding을 덮어쓰지 않아 기본값과 ≤520px 모바일 padding이 그대로 적용된다. classic·dark·minimal은 v3와 동일해야 하며 `test/extra-base-theme.test.js`(스냅샷 `test/pre-v4-snapshot.js`)가 이를 지킨다.

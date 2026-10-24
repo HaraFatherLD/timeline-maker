@@ -5,7 +5,7 @@ import { PALETTE_TOKENS, THEME_PALETTES, PALETTE_PRESETS, resolvePalette } from 
 const HEX = /^#[0-9a-f]{6}$/;
 
 test('AP-024 every theme palette and preset defines all twelve tokens', () => {
-  assert.deepEqual(Object.keys(THEME_PALETTES).sort(), ['classic', 'dark', 'minimal']);
+  assert.deepEqual(Object.keys(THEME_PALETTES).sort(), ['block', 'cards', 'classic', 'dark', 'diamond', 'metro', 'minimal', 'newspaper', 'notebook', 'terminal', 'zigzag']);
   for (const [name, palette] of Object.entries(THEME_PALETTES)) {
     assert.deepEqual(Object.keys(palette).sort(), [...PALETTE_TOKENS].sort(), name);
     for (const t of PALETTE_TOKENS) assert.match(palette[t], HEX, `${name}.${t}`);

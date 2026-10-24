@@ -62,3 +62,12 @@
 - [ ] `AP-033`: 배포 URL 200 (AC-25, 승인됨: 완료 후 배포)
 
 - [x] `AP-034` (≥4): 편집 함수(setEraColor·setPaletteColor·resetPaletteColor·resetPalette·applyPreset)·createTimeline/addEra 형태·MINIMAL_HIDDEN_TOKENS — `test/ap-034.test.js` (rev.2)
+
+---
+# v4 Acceptance Predicates — 구조 테마 8종
+- [x] `AP-035` (≥4): 테마 레지스트리 — THEMES 11종 순서, THEME_LABELS 11종 고유 한국어, THEME_PALETTES 11×12 유효 소문자 hex·테마끼리 bg/accent 조합 고유, THEME_UNUSED_TOKENS 규칙, 미지 테마 → classic 렌더, 신규 8종 각각 TIMELINE_CSS에 `.theme-<id> .tl-era::before`와 `.theme-<id> .tl-event::before` 규칙 존재, zigzag의 `@container (max-width:600px)` 한 줄 전환 규칙 + `@supports not` 안의 `@media (max-width:640px)` 폴백 존재 — `test/ap-035.test.js`
+- [x] `AP-036` (Semi): 11종 스크린샷 시트 — 시대 표시 모양이 테마별로 구분(■ ◆ ◎ ☐ 번호 등), 지그재그 좌우 배치, 카드 배지 선 없음
+- [x] `AP-037` (Semi): 각 테마에서 바탕·강조 변경 반영, 빠른 색 조합 적용, 미사용 토큰 행 숨김(minimal 2, cards 1)
+- [x] `AP-038` (Semi): 390px 폭 11종 가로 스크롤 없음, zigzag 한 줄 배치, 내보낸 HTML이 미리보기와 같은 구조
+- [ ] `AP-039` (Semi): 배포 URL에 11종 반영
+- 회귀: ap-010·ap-024의 테마 수 단언을 11종으로 갱신

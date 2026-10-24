@@ -3,7 +3,7 @@
 // Resets and presets rebuild it through `focusOf`, which also names the control that gets focus back.
 // All state changes go through the pure palette-edit functions, which validate and lower-case every colour.
 import { h, button, THEME_LABELS } from './dom.js';
-import { MINIMAL_HIDDEN_TOKENS, PALETTE_PRESETS, PALETTE_TOKENS, paletteOf } from './palette.js';
+import { PALETTE_PRESETS, PALETTE_TOKENS, paletteOf, unusedTokens } from './palette.js';
 import {
   applyPreset, resetPalette, resetPaletteColor, setEraColor, setPaletteColor,
 } from './palette-edit.js';
@@ -26,7 +26,7 @@ function colorInput(value, key, onColor) {
   return input;
 }
 
-// One palette row: colour input + [기본값]. The card/edge rows of the minimal theme are hidden, not removed.
+// One palette row: colour input + [기본값]. Rows of tokens the current theme never draws are hidden, not removed.
 function tokenRow(token, value, theme, commit) {
   const name = TOKEN_LABELS[token];
   const input = colorInput(value, `color:${token}`, (color) => commit((s) => setPaletteColor(s, s.theme, token, color)));
@@ -35,7 +35,7 @@ function tokenRow(token, value, theme, commit) {
     label: `${name} 기본값`, key: `color:${token}:reset`,
   });
   const row = h('div', 'color-row', h('label', 'color-label', input, h('span', 'color-name', name)), reset);
-  row.hidden = theme === 'minimal' && MINIMAL_HIDDEN_TOKENS.includes(token);
+  row.hidden = unusedTokens(theme).includes(token);
   return row;
 }
 

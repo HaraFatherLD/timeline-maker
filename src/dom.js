@@ -2,7 +2,10 @@
 // so strings become text nodes and never markup.
 
 /** Display names of the themes in the UI (keys are the THEMES values). */
-export const THEME_LABELS = Object.freeze({ classic: '클래식', dark: '다크', minimal: '미니멀' });
+export const THEME_LABELS = Object.freeze({
+  classic: '클래식', dark: '다크', minimal: '미니멀', block: '블록', diamond: '다이아', zigzag: '지그재그',
+  metro: '노선도', notebook: '노트', cards: '카드 배지', newspaper: '신문', terminal: '터미널',
+});
 
 /**
  * Create an element with an optional class name; string children become text nodes.

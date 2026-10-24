@@ -5,8 +5,8 @@ import { renderTimeline } from '../src/render.js';
 import { exportHtml } from '../src/export.js';
 import { sampleTimeline } from './helpers.js';
 
-test('AP-010 exactly three themes are offered', () => {
-  assert.deepEqual([...THEMES].sort(), ['classic', 'dark', 'minimal']);
+test('AP-010 exactly eleven themes are offered in order (v4)', () => {
+  assert.deepEqual([...THEMES], ['classic', 'dark', 'minimal', 'block', 'diamond', 'zigzag', 'metro', 'notebook', 'cards', 'newspaper', 'terminal']);
 });
 
 test('AP-010 each theme class reaches render and export', () => {
