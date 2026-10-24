@@ -1,0 +1,12 @@
+{
+  "name": "timeline-maker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser timeline editor with live preview and standalone HTML export",
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-reporter=tap \"test/*.test.js\"",
+    "check-size": "node scripts/check-size.mjs"
+  },
+  "license": "MIT"
+}

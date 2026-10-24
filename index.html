@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timeline Maker</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='14' width='4' height='32' fill='%238a3a2b'/%3E%3Ccircle cx='16' cy='9' r='6' fill='%238a3a2b'/%3E%3Ccircle cx='16' cy='24' r='4' fill='%238a3a2b'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <h1 class="brand">Timeline Maker</h1>
+  <div class="toolbar" role="toolbar" aria-label="작업 도구">
+    <button type="button" id="btn-download">HTML 다운로드</button>
+    <button type="button" id="btn-copy">HTML 복사</button>
+    <button type="button" id="btn-json-save">JSON 저장</button>
+    <button type="button" id="btn-json-load">JSON 불러오기</button>
+    <button type="button" id="btn-example">기본 예제</button>
+    <button type="button" id="btn-reset">초기화</button>
+  </div>
+  <p id="status" class="status" role="status" aria-live="polite"></p>
+</header>
+<main class="app">
+  <section class="pane editor-pane" aria-label="편집기">
+    <div id="editor">
+      <p class="hint">편집기를 불러오는 중입니다. 이 문구가 계속 보이면 파일을 직접(file://) 연 것일 수 있습니다. 로컬 서버(예: python -m http.server)로 여세요.</p>
+    </div>
+  </section>
+  <section class="pane preview-pane" aria-label="미리보기">
+    <div id="preview"></div>
+  </section>
+</main>
+<input type="file" id="json-file" accept=".json,application/json" hidden>
+<a id="download-link" hidden></a>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>
