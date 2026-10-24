@@ -73,3 +73,50 @@
 4. localStorage 복원은 `JSON.parse` + `normalizeTimeline` (1,000,000자 제한은 파일 불러오기에만 적용 — 정상적인 큰 자동저장이 예제로 대체되는 것을 방지).
 5. 루프 중 code-reviewer는 호출하지 않음 (코디네이터의 턴 예산 지시). ⚡ 다음 단계: `/code-review` → `/verify`.
 6. 주어진 테스트 파일은 수정하지 않았고, SPEC과 모순되는 테스트는 발견하지 못함. 설치·커밋·푸시 없음.
+
+---
+
+# Ralph Loop State — Timeline Maker v3 (색상 세부 편집)
+> 시작: 2026-10-24 | 유형: Type B (기능 추가, 기존 배포본 위) | 종료 조건: `npm test` `# fail 0` + `check-size` exit 0 + 파일 ≤300줄·함수 ≤50줄 + export JSDoc | 결과: 달성 (Iteration 2)
+
+## 판별식 상태 (루프 대상)
+| AP ID | 설명 | 유형 | 상태 | 시도 | 최근 실패 사유 |
+|-------|------|------|------|------|--------------|
+| AP-022 | palette/era.color 정규화·마이그레이션·오염 방지 (5 tests) | Auto | ✅ pass | 1 | — |
+| AP-023 | 렌더 루트 12변수·시대 색·CSS hex 금지·경계 재검증 (7 tests) | Auto | ✅ pass | 1 | — |
+| AP-024 | THEME_PALETTES·PALETTE_PRESETS·resolvePalette (3 tests) | Auto | ✅ pass | 1 | — |
+| AP-025 | 내보내기 색·CSP 1개·금지 패턴·주입 무효 (4 tests) | Auto | ✅ pass | 1 | — |
+| AP-026 | serialize→parse 왕복 색 보존 (1 test) | Auto | ✅ pass | 1 | — |
+| AP-034 | 편집 함수·모델 형태·MINIMAL_HIDDEN_TOKENS (5 tests) | Auto | ✅ pass | 1 | — |
+| AP-027 | 전체 `npm test` fail 0 + check-size | Auto | ✅ pass | 1 (집계) | — |
+| 회귀 | AP-001~013 (ap-008/009/011 포함), extra-* | Auto | ✅ pass | 1 | — |
+| AP-NFR-SIZE | 파일 ≤300줄(최대 model.js 216), 함수 ≤50줄(최대 22), export JSDoc | NFR | ✅ pass | 1 | — |
+
+루프 범위 밖 (메인 세션, 브라우저 필요): AP-028~032 (Semi), AP-033 (배포 🔒). 에이전트는 브라우저를 쓰지 않음.
+
+## 현재 상태
+- Iteration: 2 완료 (한도 5회 이내) | 통과율: 9/9 (100%) | 에스컬레이션: 없음
+- 최종 `npm test`: `# tests 98` / `# pass 98` / `# fail 0` (시작 시 86 tests / 68 pass / 18 fail; 증가분은 import 실패로 1건으로만 집계되던 파일이 실제 테스트로 실행된 결과)
+- `node scripts/check-size.mjs`: exit 0 (37개 파일 전부 ≤300줄)
+
+## 루프 히스토리
+### Iteration 0 (RED 확인)
+- 86 tests / 68 pass / 18 fail (ap-008, 009, 022~026, 034, extra-schema, extra-render). 제공된 테스트는 수정하지 않음. SPEC과 모순되는 테스트 없음.
+
+### Iteration 1 — 코어 모듈
+- 구현: `src/palette.js`(PALETTE_TOKENS, cssVar, isHex, THEME_PALETTES, PALETTE_PRESETS 6종, resolvePalette, paletteOf, MINIMAL_HIDDEN_TOKENS), `src/palette-edit.js`(setEraColor, setPaletteColor, resetPaletteColor, resetPalette, applyPreset), `schema.js`(palettes·era.color 관대 정규화, own-property만 읽기, 키 순서 고정), `model.js`(createTimeline.palettes, addEra.color), `render.js`(루트 12변수, 시대 li 3변수, TIMELINE_CSS 전면 변수화·hex 0개), `export.js`(CSP meta), `example.js`(palettes/color 포함, 고전기 시대에 `#2a7f8e` 시연).
+- 설계: THEMES를 model.js(의존성 리프)로 이동하고 schema.js에서 재export → schema↔palette 순환 import 방지. 테마·토큰은 `THEMES.includes`/`Set`으로만 판정(사용자 키로 객체 조회 없음). withThemeColors는 palettes를 THEMES 순서로 재구성하고 빈 테마를 제거.
+- /verify: PASS — `npm test` 98/98, fail 0. 프리셋 가독성(WCAG 대비) 스크래치 점검: 본문류 최소 4.68:1(파스텔), 나머지 ≥4.95.
+- 통과율: 9/9
+
+### Iteration 2 — 앱 UI
+- 구현: `src/dom.js`(h, button, THEME_LABELS 공용화), `src/color-controls.js`(색상 패널 12행·[기본값]·[모두 기본값]·프리셋 6, 시대 색 input+상태 문구+[테마 색]), `editor.js`(패널·시대 색 삽입, 테마 변경 시 폼 재구성+중복 이벤트 가드), `app.js`(`#save-warning` 지속 경고, objectURL 1000ms 후 해제·전역 보관 제거, 부팅 시 저장소 읽기 실패도 경고로), `index.html`, `style.css`(`[hidden]` 강제, 패널 반응형 그리드).
+- /verify: PASS — `node --check` 전 파일, npm test 98/98, check-size exit 0, 함수·JSDoc 점검 OK, `innerHTML`은 미리보기 1곳뿐, TIMELINE_CSS hex 리터럴 0.
+- 페이크 DOM 스모크(스크래치, 저장소 밖) 13항목 통과: 패널 12행/라벨/값, 입력 시 재구성 없음, 리셋·프리셋·테마 전환(minimal card/edge 숨김, 커밋 1회), 시대 색 설정/해제, `#save-warning` 유지·해소, objectURL 해제 시점(≈1005ms), 새로고침 복원, 읽기 실패 경고. 실제 브라우저 검증은 아님.
+- 통과율: 9/9 (100%)
+
+## 미해결 사항 / 주의 (메인 세션 /code-review·/verify 참고)
+1. AP-028~032는 실제 브라우저(classic·dark)에서 확인 필요. 특히 색 input 연속 입력, 테마 select 전환 후 포커스, 모바일 폭 레이아웃.
+2. 예제의 고전기 시대(4번째)에 `#2a7f8e`가 지정됨(밝은/어두운 테마 모두 약 4:1). AP-029에서 "다른 시대 불변" 확인 시 이 시대는 처음부터 테마 색이 아님.
+3. 시대 색 미지정 시대의 색 input은 빌드 시점의 테마 강조색을 보여 준다. 패널에서 강조를 바꾸면 다음 재구성 전까지 그 견본이 이전 색일 수 있음(미리보기·내보내기는 정상, 표시용 견본만).
+4. 루프 중 code-reviewer는 호출하지 않음(턴 예산 지시). ⚡ 다음 단계: `/code-review` → `/verify`. 설치·커밋·푸시 없음.

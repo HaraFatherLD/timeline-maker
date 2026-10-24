@@ -71,7 +71,7 @@ test('extra: __proto__ keys neither pollute nor survive', () => {
   const res = parseTimelineJson(text, counterId());
   assert.equal(res.ok, true);
   assert.equal({}.polluted, undefined);
-  assert.deepEqual(Object.keys(res.value).sort(), ['eras', 'subtitle', 'theme', 'title']);
+  assert.deepEqual(Object.keys(res.value).sort(), ['eras', 'palettes', 'subtitle', 'theme', 'title']);
   assert.equal(Object.getPrototypeOf(res.value.eras[0]), Object.prototype);
   assert.equal(res.value.eras[0].x, undefined);
 });
@@ -114,8 +114,9 @@ test('extra: non-string JSON input is an error, not a throw', () => {
 
 test('extra: normalised output keeps a stable key order and re-serialises identically', () => {
   const res = normalizeTimeline(sampleTimeline(), counterId());
-  assert.deepEqual(Object.keys(res.value), ['title', 'subtitle', 'theme', 'eras']);
-  assert.deepEqual(Object.keys(res.value.eras[0]), ['id', 'name', 'period', 'description', 'events']);
+  assert.deepEqual(Object.keys(res.value), ['title', 'subtitle', 'theme', 'palettes', 'eras']);
+  assert.deepEqual(Object.keys(res.value.eras[0]), ['id', 'name', 'period', 'description', 'color', 'events']);
   assert.deepEqual(Object.keys(res.value.eras[0].events[0]), ['id', 'date', 'title', 'description']);
-  assert.equal(serializeTimeline(res.value), serializeTimeline(sampleTimeline()));
+  // v3 adds palettes/color, so compare against a second normalisation instead of the raw fixture.
+  assert.equal(serializeTimeline(normalizeTimeline(res.value, counterId()).value), serializeTimeline(res.value));
 });

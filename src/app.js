@@ -1,5 +1,5 @@
 // DOM binding: holds the state, drives the live preview, autosaves, and wires the toolbar.
-// Together with editor.js this is the only code that touches the DOM.
+// Together with editor.js, color-controls.js and dom.js this is the only code that touches the DOM.
 import { exampleTimeline } from './example.js';
 import { createTimeline } from './model.js';
 import { renderTimeline, TIMELINE_CSS } from './render.js';
@@ -11,14 +11,25 @@ const STORAGE_KEY = 'timeline-maker:v1';
 // 1,000,000 characters take at most 3 bytes each in UTF-8, so a bigger file cannot be valid.
 const MAX_FILE_BYTES = 3_000_010;
 
+// Revoking the object URL right after click() can cancel the download in some browsers [A], so wait a moment.
+const REVOKE_DELAY_MS = 1000;
+
 const $ = (id) => document.getElementById(id);
-const ui = { editor: $('editor'), preview: $('preview'), status: $('status'), link: $('download-link'), file: $('json-file') };
+const ui = {
+  editor: $('editor'), preview: $('preview'), status: $('status'), warning: $('save-warning'),
+  link: $('download-link'), file: $('json-file'),
+};
 let state = createTimeline();
-let blobUrl = null;
 
 function setStatus(message, isError = false) {
   ui.status.textContent = message;
   ui.status.dataset.kind = isError ? 'error' : 'info';
+}
+
+// Autosave problems get their own element: it stays until a save succeeds, and no status message touches it.
+function setSaveWarning(message) {
+  ui.warning.textContent = message;
+  ui.warning.hidden = message === '';
 }
 
 // The preview is the only place HTML is parsed; renderTimeline escapes every user value.
@@ -29,8 +40,9 @@ function updatePreview() {
 function save() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    setSaveWarning('');
   } catch {
-    setStatus('자동 저장 실패: 브라우저 저장소를 사용할 수 없거나 가득 찼습니다.', true);
+    setSaveWarning('자동 저장 실패: 브라우저 저장소를 사용할 수 없거나 가득 찼습니다. 새로고침하면 변경 내용이 사라질 수 있으니 [JSON 저장]으로 백업하세요.');
   }
 }
 
@@ -62,7 +74,8 @@ function restore() {
   try {
     text = localStorage.getItem(STORAGE_KEY);
   } catch {
-    return { timeline: exampleTimeline(), message: '브라우저 저장소를 사용할 수 없어 자동 저장되지 않습니다.' };
+    setSaveWarning('브라우저 저장소를 사용할 수 없어 자동 저장되지 않습니다. 작업 내용은 [JSON 저장]으로 백업하세요.');
+    return { timeline: exampleTimeline(), message: '' };
   }
   if (text === null) return { timeline: exampleTimeline(), message: '' };
   let raw;
@@ -77,12 +90,13 @@ function restore() {
 }
 
 // Download through one persistent hidden <a download>, so the file name stays inspectable.
+// The object URL lives only in this call: a timer revokes it once the browser has started the download.
 function download(filename, text, type) {
-  if (blobUrl) URL.revokeObjectURL(blobUrl);
-  blobUrl = URL.createObjectURL(new Blob([text], { type }));
-  ui.link.href = blobUrl;
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  ui.link.href = url;
   ui.link.download = filename;
   ui.link.click();
+  setTimeout(() => URL.revokeObjectURL(url), REVOKE_DELAY_MS);
   setStatus(`${filename} 다운로드를 시작했습니다.`);
 }
 

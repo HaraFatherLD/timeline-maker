@@ -55,8 +55,8 @@ test('AP-009 unknown theme -> classic, unknown keys dropped, missing strings -> 
   assert.equal(res.value.theme, 'classic');
   assert.equal(res.value.subtitle, '');
   assert.deepEqual(res.value.eras[1].events, []);
-  assert.deepEqual(Object.keys(res.value).sort(), ['eras', 'subtitle', 'theme', 'title']);
-  assert.deepEqual(Object.keys(res.value.eras[0]).sort(), ['description', 'events', 'id', 'name', 'period']);
+  assert.deepEqual(Object.keys(res.value).sort(), ['eras', 'palettes', 'subtitle', 'theme', 'title']);
+  assert.deepEqual(Object.keys(res.value.eras[0]).sort(), ['color', 'description', 'events', 'id', 'name', 'period']);
   assert.deepEqual(Object.keys(res.value.eras[0].events[0]).sort(), ['date', 'description', 'id', 'title']);
 });
 

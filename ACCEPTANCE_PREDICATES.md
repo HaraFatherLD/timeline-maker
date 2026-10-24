@@ -39,3 +39,26 @@
 - 총 AP 수: 23 (AP-021 신규)
 - 자동: 13 | 반자동: 7 | 수동: 1 | NFR: 2
 - 전체 통과 조건: 자동 100% + 반자동 100% + 수동 승인 + NFR 100%
+
+---
+
+# v3 Acceptance Predicates (SPEC v3)
+> 공통 통과 조건 v1과 동일. 기존 AP-001~013은 회귀 AP로 계속 통과(ap-008/009/011 기대값은 v3 필드 포함으로 갱신).
+
+## 자동
+- [x] `AP-022` (≥5): palette 정규화 — 비객체·미지 테마·미지 토큰·무효 hex 제거, 대문자 → 소문자, 빈 테마 제거, JSON `__proto__` 입력 오염 없음, era.color 규칙(유효/대문자/무효/비문자열), v2 데이터 마이그레이션, 결과 키 목록 (AC-18) — `test/ap-022.test.js`
+- [x] `AP-023` (≥4): 렌더 — 루트 style에 12변수가 PALETTE_TOKENS 순서로 모두 존재, override 반영·미override는 테마 기본, 미지 테마 classic, 시대 color → 해당 li에만 `--accent/--dot/--date`, color 없는 시대 style 없음, TIMELINE_CSS가 12변수를 모두 사용하고 테마 클래스에 hex 색 없음 (AC-19) — `test/ap-023.test.js`
+- [x] `AP-024` (≥2): THEME_PALETTES 3종·PALETTE_PRESETS 6종 12토큰 전부 유효 hex, preset id/label 고정 목록, resolvePalette 리터럴 (AC-20) — `test/ap-024.test.js`
+- [x] `AP-025` (≥3): exportHtml — 사용자 색·시대 색 포함, CSP meta 정확히 1개, 금지 패턴 없음, palette 값에 주입 시도(`red;}</style><script>`) 무효 처리 (AC-21) — `test/ap-025.test.js`
+- [x] `AP-026` (≥1): serialize → parse 왕복 시 palettes·era.color deepEqual (AC-22) — `test/ap-026.test.js`
+- [x] `AP-027`: 전체 `npm test` fail 0, `check-size` 통과
+
+## 반자동 (격리 브라우저 컨텍스트)
+- [x] `AP-028`: 색상 패널 12개 변경 → 미리보기 computed 색 반영, [기본값]/[모두 기본값], 테마 전환 시 테마별 색 유지, 새로고침 후 유지 (AC-23)
+- [x] `AP-029`: 시대 색 지정 → 그 시대 점·기간·사건 날짜 색 변경, 다른 시대 불변, [테마 색]으로 복귀 (AC-23)
+- [x] `AP-030`: 빠른 색 조합 6종 클릭 → 12변수 모두 해당 preset 값 (AC-23)
+- [x] `AP-031`: localStorage 쓰기 실패 주입 → `#save-warning` 표시, HTML 복사 등 다른 상태 메시지 후에도 유지, 성공 저장 후 사라짐; 다운로드 후 objectURL 해제 확인 (AC-24)
+- [x] `AP-032`: 내보낸 HTML을 열어 사용자 색 적용·콘솔 error 0 (AC-21)
+- [ ] `AP-033`: 배포 URL 200 (AC-25, 승인됨: 완료 후 배포)
+
+- [x] `AP-034` (≥4): 편집 함수(setEraColor·setPaletteColor·resetPaletteColor·resetPalette·applyPreset)·createTimeline/addEra 형태·MINIMAL_HIDDEN_TOKENS — `test/ap-034.test.js` (rev.2)

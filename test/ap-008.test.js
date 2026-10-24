@@ -8,7 +8,8 @@ test('AP-008 serialize -> parse round-trips the sample', () => {
   const t = sampleTimeline();
   const res = parseTimelineJson(serializeTimeline(t), counterId());
   assert.equal(res.ok, true);
-  assert.deepEqual(res.value, t);
+  // v3: normalisation adds the colour fields with their defaults.
+  assert.deepEqual(res.value, { ...t, palettes: {}, eras: t.eras.map((e) => ({ ...e, color: '' })) });
 });
 
 test('AP-008 serialize -> parse round-trips the example (Unicode)', () => {

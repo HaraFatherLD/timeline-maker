@@ -1,5 +1,6 @@
 // Original sample content: a short outline of ancient Greek history, in Korean.
 import { createTimeline, addEra, addEvent } from './model.js';
+import { setEraColor } from './palette-edit.js';
 
 const TITLE = '고대 그리스 연표';
 const SUBTITLE = '청동기 시대의 크레타에서 로마의 지배까지, 약 3천 년의 흐름';
@@ -36,6 +37,7 @@ const ERAS = [
   },
   {
     name: '고전기',
+    color: '#2a7f8e', // showcases the per-era colour; readable on the light and the dark theme
     period: '기원전 500년경 ~ 기원전 323년',
     description: '페르시아 전쟁을 거치며 아테네가 번영하고 철학과 연극, 건축이 꽃핀 시기. 그러나 아테네와 스파르타의 대립이 전쟁으로 번져 폴리스 세계는 크게 약해졌다.',
     events: [
@@ -60,7 +62,7 @@ const ERAS = [
 ];
 
 /**
- * Build a fresh sample timeline (5 eras, each with events).
+ * Build a fresh sample timeline (5 eras, each with events; one era carries its own colour).
  * @param {() => string} [genId] id generator, defaults to the model's default
  * @returns {import('./model.js').Timeline}
  */
@@ -69,6 +71,7 @@ export function exampleTimeline(genId) {
   for (const era of ERAS) {
     tl = addEra(tl, era, genId);
     const eraId = tl.eras[tl.eras.length - 1].id;
+    if (era.color) tl = setEraColor(tl, eraId, era.color);
     for (const event of era.events) tl = addEvent(tl, eraId, event, genId);
   }
   return tl;

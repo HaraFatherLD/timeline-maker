@@ -6,6 +6,8 @@ import { renderTimeline, TIMELINE_CSS } from './render.js';
 const FALLBACK_TITLE = '타임라인';
 const FALLBACK_FILENAME = 'timeline.html';
 const MAX_BASENAME = 100;
+// The exported file needs nothing but its own inline style: forbid everything else, even if markup slipped in.
+const CSP = "default-src 'none'; style-src 'unsafe-inline'";
 // Page-level rules only the exported document needs (the app page styles itself).
 const DOCUMENT_CSS = 'html,body{margin:0;padding:0}body>.tl{min-height:100vh}';
 // Path separators, Windows-forbidden characters, control characters and bidi overrides.
@@ -25,6 +27,7 @@ export function exportHtml(tl) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="${CSP}">
 <title>${title}</title>
 <style>${TIMELINE_CSS}${DOCUMENT_CSS}
 </style>

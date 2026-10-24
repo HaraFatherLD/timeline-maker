@@ -22,13 +22,13 @@ test('extra: rendered markup is balanced and ordered as header, eras, events', (
 test('extra: render tolerates missing and partial input without throwing', () => {
   for (const tl of [undefined, null, {}, { eras: null }, { eras: [null, {}, { events: [null, {}] }] }]) {
     assert.doesNotThrow(() => renderTimeline(tl));
-    assert.match(renderTimeline(tl), /^<div class="tl theme-classic">/);
+    assert.match(renderTimeline(tl), /^<div class="tl theme-classic" style="--bg:#[0-9a-f]{6};/);
   }
 });
 
 test('extra: the header is omitted for an empty title and subtitle', () => {
   const html = renderTimeline({ title: '', subtitle: '', theme: 'dark', eras: [] });
-  assert.equal(html, '<div class="tl theme-dark"></div>');
+  assert.match(html, /^<div class="tl theme-dark" style="[^"]*"><\/div>$/);
 });
 
 test('extra: newlines in descriptions survive (CSS pre-line shows them)', () => {

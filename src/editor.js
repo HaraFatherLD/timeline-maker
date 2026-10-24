@@ -2,19 +2,11 @@
 // renderEditor() rebuilds the whole form, so callers do that on structural changes only.
 // Plain typing goes through `commit` without a rebuild, which keeps focus and IME composition.
 import {
-  LIMITS, addEra, updateEra, removeEra, moveEra, addEvent, updateEvent, removeEvent, moveEvent,
+  LIMITS, THEMES, addEra, updateEra, removeEra, moveEra, addEvent, updateEvent, removeEvent, moveEvent,
 } from './model.js';
-import { THEMES } from './schema.js';
-
-const THEME_LABELS = { classic: '클래식', dark: '다크', minimal: '미니멀' };
-
-// Create an element; string children become text nodes, never markup.
-function h(tag, className, ...children) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  node.append(...children);
-  return node;
-}
+import { h, button, THEME_LABELS } from './dom.js';
+import { colorPanel, eraColorField } from './color-controls.js';
+import { paletteOf } from './palette.js';
 
 // Labelled single-line input or textarea; maxlength comes from the schema limit.
 function textField(label, value, max, onInput, { multiline = false, key = '' } = {}) {
@@ -28,6 +20,8 @@ function textField(label, value, max, onInput, { multiline = false, key = '' } =
   return h('label', 'field', h('span', 'field-label', label), input);
 }
 
+// Theme select. A change rebuilds the form (the colour panel shows that theme's colours), so a repeated
+// event for the same value is ignored: a real change fires both `input` and `change`.
 function themeField(value, onChange) {
   const select = document.createElement('select');
   for (const theme of THEMES) {
@@ -36,19 +30,15 @@ function themeField(value, onChange) {
     select.append(option);
   }
   select.value = value;
-  for (const type of ['input', 'change']) select.addEventListener(type, () => onChange(select.value));
+  select.dataset.key = 'meta:theme';
+  let last = value;
+  const apply = () => {
+    if (select.value === last) return;
+    last = select.value;
+    onChange(last);
+  };
+  for (const type of ['input', 'change']) select.addEventListener(type, apply);
   return h('label', 'field', h('span', 'field-label', '테마'), select);
-}
-
-function button(text, onClick, { label = '', key = '', disabled = false, variant = '', title = '' } = {}) {
-  const node = h('button', variant, text);
-  node.type = 'button';
-  if (label) node.setAttribute('aria-label', label);
-  if (label || title) node.title = title || label;
-  node.disabled = disabled;
-  if (key) node.dataset.key = key;
-  node.addEventListener('click', onClick);
-  return node;
 }
 
 // Move up / move down / delete buttons for an era or an event.
@@ -73,7 +63,7 @@ function eventRow(eraId, ev, index, total, commit) {
     textField('설명', ev.description, LIMITS.text, patch('description'), { multiline: true }));
 }
 
-function eraBlock(era, index, total, commit) {
+function eraBlock(era, index, total, commit, themeAccent) {
   const key = `era:${era.id}`;
   const noun = `시대 ${index + 1}`;
   const patch = (field) => (value) => commit((s) => updateEra(s, era.id, { [field]: value }));
@@ -90,6 +80,7 @@ function eraBlock(era, index, total, commit) {
     textField('시대 이름', era.name, LIMITS.text, patch('name'), { key: `${key}:name` }),
     textField('기간', era.period, LIMITS.text, patch('period')),
     textField('설명', era.description, LIMITS.text, patch('description'), { multiline: true }),
+    eraColorField(era, noun, themeAccent, commit),
     ...era.events.map((ev, i) => eventRow(era.id, ev, i, era.events.length, commit)),
     button('사건 추가', addNewEvent, {
       key: `${key}:add`, disabled: full, title: full ? `사건은 시대당 최대 ${LIMITS.events}개입니다` : '',
@@ -115,16 +106,19 @@ function focusControl(root, key) {
  */
 export function renderEditor(root, state, commit, focusKey = '') {
   const meta = (field) => (value) => commit((s) => ({ ...s, [field]: value }));
-  const setTheme = (value) => commit((s) => ({ ...s, theme: THEMES.includes(value) ? value : THEMES[0] }));
+  const setTheme = (value) => commit(
+    (s) => ({ ...s, theme: THEMES.includes(value) ? value : THEMES[0] }), () => 'meta:theme');
   const addNewEra = () => commit((s) => addEra(s), (next) => `era:${next.eras.at(-1).id}:name`);
+  const themeAccent = paletteOf(state).accent;
   const full = state.eras.length >= LIMITS.eras;
   const empty = h('p', 'hint', '아직 시대가 없습니다. 아래 버튼으로 첫 시대를 추가하세요.');
   root.replaceChildren(
     textField('타임라인 제목', state.title, LIMITS.title, meta('title'), { key: 'meta:title' }),
     textField('부제', state.subtitle, LIMITS.subtitle, meta('subtitle')),
     themeField(state.theme, setTheme),
+    colorPanel(state, commit),
     ...(state.eras.length ? [] : [empty]),
-    ...state.eras.map((era, i) => eraBlock(era, i, state.eras.length, commit)),
+    ...state.eras.map((era, i) => eraBlock(era, i, state.eras.length, commit, themeAccent)),
     button('시대 추가', addNewEra, {
       key: 'add-era', variant: 'primary', disabled: full, title: full ? `시대는 최대 ${LIMITS.eras}개입니다` : '',
     }));

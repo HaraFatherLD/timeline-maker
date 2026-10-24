@@ -47,3 +47,31 @@ background:#fff;border:1px solid var(--ui-line);border-radius:6px}
 .item-title{margin:0;font-size:1rem}
 .item-actions{display:flex;flex-shrink:0;gap:4px}
 .era>button,.editor-pane>#editor>button{margin-top:10px}
+
+/* An author display rule must never override the hidden attribute (hidden colour rows, save warning). */
+[hidden]{display:none!important}
+
+/* Persistent autosave warning: its own full-width row in the top bar. */
+.save-warning{flex:1 1 100%;margin:0;padding:6px 10px;font-size:.9rem;font-weight:600;color:var(--ui-danger);
+background:#fdecea;border:1px solid #f1b5b0;border-radius:6px;overflow-wrap:anywhere}
+
+/* Colour panel: one column on phones, more as the editor pane gets wider. */
+.colors{margin:0 0 14px;padding:12px;background:#fff;border:1px solid var(--ui-line);border-radius:8px}
+.colors-title{margin:0;font-size:1rem}
+.colors .hint{margin:2px 0 10px;font-size:.85rem}
+.colors-subtitle{margin:14px 0 6px;font-size:.85rem;color:var(--ui-muted)}
+.color-rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px 14px}
+.color-row{display:flex;align-items:center;gap:8px;min-width:0}
+.color-label{display:flex;flex:1;align-items:center;gap:8px;min-width:0;cursor:pointer}
+.color-name{min-width:0;font-size:.9rem;overflow-wrap:anywhere}
+input[type="color"]{flex-shrink:0;width:44px;height:34px;padding:2px;background:#fff;border:1px solid var(--ui-line);
+border-radius:6px;cursor:pointer}
+.color-actions{margin-top:10px}
+.preset-row{display:flex;flex-wrap:wrap;gap:6px}
+.preset-row button{display:inline-flex;align-items:center;gap:6px}
+.swatch{display:inline-block;width:18px;height:18px;border:4px solid transparent;border-radius:50%}
+
+/* Per-era colour: input, status text and [테마 색] on one wrapping line. */
+.color-field{margin:0 0 10px}
+.color-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.color-status{flex:1 1 120px;min-width:0;font-size:.85rem;color:var(--ui-muted);overflow-wrap:anywhere}

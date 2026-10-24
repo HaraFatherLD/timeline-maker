@@ -3,12 +3,17 @@
 
 /**
  * @typedef {{ id: string, date: string, title: string, description: string }} TimelineEvent
- * @typedef {{ id: string, name: string, period: string, description: string, events: TimelineEvent[] }} Era
- * @typedef {{ title: string, subtitle: string, theme: string, eras: Era[] }} Timeline
+ * @typedef {{ id: string, name: string, period: string, description: string, color: string, events: TimelineEvent[] }} Era
+ *   color is '' (use the theme colour) or a lower-case #rrggbb
+ * @typedef {{ title: string, subtitle: string, theme: string, palettes: Object, eras: Era[] }} Timeline
+ *   palettes maps a theme name to { token: '#rrggbb' } overrides (see palette.js)
  */
 
 /** Schema limits shared by the model, the validator and the editor form (maxlength). */
 export const LIMITS = Object.freeze({ title: 200, subtitle: 500, text: 5000, eras: 200, events: 500 });
+
+/** Selectable themes. The first entry is the fallback for unknown values. */
+export const THEMES = Object.freeze(['classic', 'dark', 'minimal']);
 
 /** Allowed id format: 1-64 letters, digits, underscore or hyphen. */
 export const ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
@@ -108,11 +113,11 @@ function moved(list, id, dir) {
  * @returns {Timeline}
  */
 export function createTimeline() {
-  return { title: '', subtitle: '', theme: 'classic', eras: [] };
+  return { title: '', subtitle: '', theme: 'classic', palettes: {}, eras: [] };
 }
 
 /**
- * Append an era. At the LIMITS.eras cap the content is returned unchanged.
+ * Append an era with no custom colour (color ''). At the LIMITS.eras cap the content is returned unchanged.
  * @param {Timeline} tl
  * @param {{ name?: string, period?: string, description?: string }} [data]
  * @param {() => string} [genId] id generator, defaults to defaultGenId
@@ -120,7 +125,7 @@ export function createTimeline() {
  */
 export function addEra(tl, data = {}, genId) {
   if (tl.eras.length >= LIMITS.eras) return { ...tl, eras: [...tl.eras] };
-  const era = { id: uniqueId(genId, allIds(tl)), ...textFields(data, ERA_FIELDS), events: [] };
+  const era = { id: uniqueId(genId, allIds(tl)), ...textFields(data, ERA_FIELDS), color: '', events: [] };
   return { ...tl, eras: [...tl.eras, era] };
 }
 
